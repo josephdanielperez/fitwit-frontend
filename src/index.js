@@ -1,63 +1,81 @@
-document.addEventListener("DOMContentLoaded", () => {
-    fetchSplits();
-    fetchExercises();
-    getWorkout();
+document.addEventListener('DOMContentLoaded', () => {
+    getLocalWorkout();
 })
 
-const targetUrl = "http://localhost:3000"
+const targetUrl = 'http://localhost:3000'
 
-document.addEventListener('submit', getFormData)
+// dom elements //
+const formDiv = document.getElementById('form-div');
+const workoutDiv = document.getElementById('workout-div');
+const workoutList = document.getElementById('workout-list');
+const finishButton = document.getElementById('finish-workout');
 
-let user = {name: '', split: '', length: ''}
-const filteredWorkoutSplit = []
-const filteredWorkoutExercises = []
+// buttons event listeners //
+document.addEventListener('submit', getFormData);
+workoutList.addEventListener('click', check);
+finishButton.addEventListener('click', reset);
+
+// objects & arrays //
+let user;
+let selectedSplit;
+const selectedExercises = []
 const generatedWorkout = []
 
-// collects form data and makes usable throughout code //
+// methods //
 function getFormData(event) {
     event.preventDefault();
-    let name = document.getElementsByName('name')[0].value;
-    user.name = name;
-    let workoutSplit  = document.getElementsByName('split')[0].value;
-    user.split = workoutSplit;
-    let workoutLength = document.getElementsByName('length')[0].value;
-    user.length = workoutLength;
 
-    generateUserWorkout();
+    let name = User.name.value;
+    let split  = User.split.value;
+    let length = User.length.value;
+
+    user = new User(name, split, length);
+
+    selectSplit();
+    setTimeout(selectExercises, 100);
+    setTimeout(setupWorkout, 200);
 }
 
-// this method takes the user's requested split and filters the exercise array with exercises that match the split.id //
-function generateUserWorkout() {
+function selectSplit() {
+    fetch(`${targetUrl}/splits`)
+    .then(resp => resp.json())
+    .then(splits => {
+        for (const split of splits){
+            if (split.name === user.split) {
+                let x = new Split(split.id, split.name);
+                x.filterId();
+            }
+        }
+    })
+}
 
+function selectExercises() {
+    fetch(`${targetUrl}/exercises`)
+    .then(resp => resp.json())
+    .then(exercises => {
+        for (const exercise of exercises){
+            if (exercise.split_id === selectedSplit) {
+                let x = new Exercise(exercise.id, exercise.name, exercise.split_id);
+                x.filterExercise();
+            }
+        }
+    })
+}
+
+function setupWorkout() {
     // change display from form to workout div //
-    formDiv.classList.toggle("hide");
-    workoutDiv.classList.toggle("hide");
+    formDiv.classList.toggle('hide');
+    workoutDiv.classList.toggle('hide');
 
-    // grabs the user requested split element... //
-    for (let i = 0; i < s.length; i++) {
-        if (s[i].name === `${user.split}`) {
-            filteredWorkoutSplit.push(s[i]);
-        }
-    }
+    // creates a workout based off selected exercises and the user's requested length //
+    generateWorkout(selectedExercises, Number(user.length));
 
-    // grabs the exercise elements that match the user's requested split... //
-    for (let i = 0; i < e.length; i++) {
-        if (e[i].split_id === filteredWorkoutSplit[0].id) {
-            filteredWorkoutExercises.push(e[i]);
-        }
-    }
-
-    // takes the filtered exercises and user's requested amount of exercises to make a random, customized workout //
-    generatedWorkout.push(getRandomExercises(filteredWorkoutExercises, Number(user.length)));
-    // THE METHOD ABOVE GENERATES ENDLESS ARRAYS FILTERED INTO GENERATEDWORKOUT ARRAY, MIGHT NEED TO FIX, MIGHT NOT //
-
-    // turns every exercise in the user's generated workout into a list item todo list //
-    generatedWorkout[0].forEach(exercise => addWorkoutList(exercise));
-    completeWorkout();
+    // displays exercise in the user's workout to form a todo list //
+    setTimeout(generatedWorkout.forEach(exercise => displayWorkoutList(exercise)), 100)
+    finishWorkout();
 };
 
-// this method takes the filtered exercise array, shuffles it, and returns the amount of exercises the user requested //
-function getRandomExercises(list, size) {
+function generateWorkout(list, size) {
     var currentIndex = list.length, temporaryValue, randomIndex;
 
     // while there remain elements to shuffle... //
@@ -73,52 +91,46 @@ function getRandomExercises(list, size) {
         list[randomIndex] = temporaryValue;
     }
 
-    return list.slice(0, size);
+    let x = list.slice(0, size)
+    x.forEach(exercise => generatedWorkout.push(exercise));
 };
 
-const formDiv = document.getElementById("form-div");
-const workoutDiv = document.getElementById("workout-div");
-const workoutList = document.getElementById("workout-list");
 
-workoutList.addEventListener("click", check);
-
-
-function addWorkoutList(exercise) {
-    
+function displayWorkoutList(exercise) {
     // workout div //
-    const workoutDiv = document.createElement("div");
-    workoutDiv.classList.add("workout");
+    const workoutDiv = document.createElement('div');
+    workoutDiv.classList.add('workout');
     
     // create list items //
-    const newWorkout = document.createElement("li");
-    newWorkout.innerText = `${exercise.name}`;
-    newWorkout.classList.add("workout-item");
+    const newWorkout = document.createElement('li');
+    newWorkout.innerText = `${exercise}`;
+    newWorkout.classList.add('workout-item');
     workoutDiv.appendChild(newWorkout);
 
     // add exercise to local storage //
-    saveLocalWorkout(`${exercise.name}`);
+    saveLocalWorkout(`${exercise}`);
 
     // check mark button //
-    const completedButton = document.createElement("button");
+    const completedButton = document.createElement('button');
     
     //completedButton.innerText = "what it do booboo";
-    completedButton.innerHTML = "<i class='fas fa-check'></i>";
-    completedButton.classList.add("complete-btn");
+    completedButton.innerHTML = '<i class="fas fa-check"></i>';
+    completedButton.classList.add('complete-btn');
     workoutDiv.appendChild(completedButton);
     
     // append to list //
     workoutList.appendChild(workoutDiv);
 
-    completedButton.addEventListener('click', first);
+    completedButton.addEventListener('click', finishBuffer);
 }
 
-function check(e) {
-    const checkmark = e.target;
+function check(x) {
+    const checkmark = x.target;
 
     // allows user to visually show exercise has been completed //
-    if (checkmark.classList[0] === "complete-btn") {
+    if (checkmark.classList[0] === 'complete-btn') {
         const workout = checkmark.parentElement;
-        workout.classList.toggle("completed");
+        workout.classList.toggle('completed');
     }
 }
 
@@ -126,102 +138,71 @@ function check(e) {
 function saveLocalWorkout(exercise) {
     // CHECK IF I ALREADY HAVE THINGS IN THERE? //
     let workout;
-    if (localStorage.getItem("workout") === null) {
+    if (localStorage.getItem('workout') === null) {
         workout = [];
     } else {
-        workout = JSON.parse(localStorage.getItem("workout"));
+        workout = JSON.parse(localStorage.getItem('workout'));
     }
     workout.push(exercise);
-    localStorage.setItem("workout", JSON.stringify(workout));
+    localStorage.setItem('workout', JSON.stringify(workout));
 }
 
-const finishButton = document.getElementById("finish-workout");
-finishButton.addEventListener("click", reset);
-
-function getWorkout() {
+function getLocalWorkout() {
     // CHECK IF I ALREADY HAVE THINGS IN THERE? //
     let workout;
-    if (localStorage.getItem("workout") === null) {
+    if (localStorage.getItem('workout') === null) {
         workout = [];
     } else {
-        workout = JSON.parse(localStorage.getItem("workout"));
-        formDiv.classList.toggle("hide");
-        workoutDiv.classList.toggle("hide");
+        workout = JSON.parse(localStorage.getItem('workout'));
+        formDiv.classList.toggle('hide');
+        workoutDiv.classList.toggle('hide');
     }
     workout.forEach(function(exercise) {
         // workout div //
-        const workoutDiv = document.createElement("div");
-        workoutDiv.classList.add("workout");
+        const workoutDiv = document.createElement('div');
+        workoutDiv.classList.add('workout');
 
         // create list items //
-        const newWorkout = document.createElement("li");
+        const newWorkout = document.createElement('li');
         newWorkout.innerText = exercise;
-        newWorkout.classList.add("workout-item");
+        newWorkout.classList.add('workout-item');
         workoutDiv.appendChild(newWorkout);
 
         // check mark button //
-        const completedButton = document.createElement("button");
+        const completedButton = document.createElement('button');
 
-        //completedButton.innerText = "what it do booboo";
-        completedButton.innerHTML = "<i class='fas fa-check'></i>";
-        completedButton.classList.add("complete-btn");
+        completedButton.innerHTML = '<i class="fas fa-check"></i>';
+        completedButton.classList.add('complete-btn');
         workoutDiv.appendChild(completedButton);
 
         // append to list //
         workoutList.appendChild(workoutDiv);
 
-
-        completedButton.addEventListener('click', first);
+        completedButton.addEventListener('click', finishBuffer);
     });
 }
 
-
-// allows button event listener to be registered on click //
-function first() {
-    document.addEventListener("click", completeWorkout)
+// allows app to recognize the last clicked element //
+function finishBuffer() {
+    setTimeout(finishWorkout, 0);
 }
 
-// wraps up the app, shows a complete button when everything is crossed out and resets the app afterwards //
-function completeWorkout() {
-    if ($("#workout-list .workout.completed").length === $("#workout-list .workout").length) {
-        finishButton.classList.remove("hide");
+// displays the finish wokrout button only when everything is crossed out //
+function finishWorkout() {
+    if ($('#workout-list .workout.completed').length === $('#workout-list .workout').length) {
+        finishButton.classList.remove('hide');
+    } else {
+        finishButton.classList.add('hide');
     }
 }
 
-function reset(e) {
-    if (user.name != '') {
+// resets app //
+function reset() {
+    if (user) {
         alert(`Great job today, ${user.name}! See you for another workout soon!`);
     } else {
         alert(`Great job today! See you for another workout soon!`);
     }
     localStorage.clear();
     location.reload();
-}
-
-// methods to bridge backend database and frontend development //
-const s = []
-const e = []
-
-function fetchSplits() {
-    fetch(`${targetUrl}/splits`)
-    .then(resp => resp.json())
-    .then(splits => {
-        for (const split of splits){
-            let x = new Split(split.id, split.name)
-            console.log(x)
-            s.push(x);
-        }
-    })
-}
-
-function fetchExercises() {
-    fetch(`${targetUrl}/exercises`)
-    .then(resp => resp.json())
-    .then(exercises => {
-        for (const exercise of exercises){
-            let y = new Exercise(exercise.id, exercise.name, exercise.split_id)
-            console.log(y)
-            e.push(y);
-        }
-    })
 }

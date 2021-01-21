@@ -6,6 +6,8 @@ class Exercise {
         this.split_id = split_id;
     }
 
-    
+    filterExercise() {
+        selectedExercises.push(this.name)
+    }
 
 }

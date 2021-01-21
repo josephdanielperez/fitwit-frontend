@@ -4,5 +4,8 @@ class Split {
         this.name = name;
     }
 
+    filterId() {
+        selectedSplit = this.id
+    }
 
 }
