@@ -216,7 +216,9 @@ function reset() {
     location.reload();
 }
 
-function back() {
+function back(event) {
+    event.preventDefault();
+
     formDiv.classList.toggle('hide');
     createDiv.classList.toggle('hide');
 }
@@ -228,6 +230,7 @@ function navigateCreateMenu(event) {
     createDiv.classList.toggle('hide');
 
     createButton.addEventListener('click', exerciseFormData);
+    backButton.addEventListener('click', back);
 }
 
 function exerciseFormData(event) {
