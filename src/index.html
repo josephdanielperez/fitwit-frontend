@@ -14,7 +14,7 @@
                 <div id="form-div">
                     <form id="new-user-form">
                         <label for="name">Name:</label>
-                        <input type="text" id="name" name="name">
+                        <input type="text" id="name" name="name" required>
 
                         <br><br>
 
@@ -40,9 +40,35 @@
 
                         <br><br>
 
-                        <button type="submit" class="btn" id="submit">Start Workout</button>
+                        <input type="submit" class="btn" id="start-workout" value="Start Workout">
+                        <input type="submit" class="btn" id="create-menu" value="Create An Exercise">
                     </form>
                 </div>
+
+                <div id="create-div" class="hide">
+                    <form id="new-exercise-form">
+                        <label for="exercise-name">Name:</label>
+                        <input type="text" id="exercise-name" name="exercise-name" required>
+
+                        <br><br>
+
+                        <label for="split-id">Split:</label>
+                        <select id="split-id" name="split-id">
+                            <option value="1">Chest</option>
+                            <option value="2">Back</option>
+                            <option value="3">Shoulders</option>
+                            <option value="4">Legs</option>
+                            <option value="5">Arms</option>
+                            <option value="10">HITT (Cardio)</option>
+                        </select>
+
+                        <br><br>
+
+                        <input type="submit" class="btn" id="create-exercise" value="Create Exercise">
+                        <input type="submit" class="btn" id="back" value="Back">
+                    </form>
+                </div>
+
                 <div id="workout-div" class="hide">
                     <h2>Today's Workout:</h2>
                     <ul id="workout-list">
@@ -50,7 +76,7 @@
                         
                     </ul>
                     <div class="finish-button">
-                        <button type="submit" class="btn hide" id="finish-workout">Finish Workout</button>
+                        <input type="submit" class="btn hide" id="finish-workout" input="Finish Workout">
                     </div>
                 </div>
             </div>

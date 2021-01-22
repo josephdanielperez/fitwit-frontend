@@ -7,13 +7,22 @@ const targetUrl = 'http://localhost:3000'
 // dom elements //
 const formDiv = document.getElementById('form-div');
 const workoutDiv = document.getElementById('workout-div');
+const createDiv = document.getElementById('create-div');
+
 const workoutList = document.getElementById('workout-list');
+
+const startButton = document.getElementById('start-workout');
 const finishButton = document.getElementById('finish-workout');
+const navigateButton = document.getElementById('create-menu');
+const createButton = document.getElementById('create-exercise');
+const backButton = document.getElementById('back');
 
 // buttons event listeners //
-document.addEventListener('submit', getFormData);
+startButton.addEventListener('submit', getFormData);
 workoutList.addEventListener('click', check);
 finishButton.addEventListener('click', reset);
+navigateButton.addEventListener('click', navigateCreateMenu);
+backButton.addEventListener('click', location.reload);
 
 // objects & arrays //
 let user;
@@ -113,7 +122,6 @@ function displayWorkoutList(exercise) {
     // check mark button //
     const completedButton = document.createElement('button');
     
-    //completedButton.innerText = "what it do booboo";
     completedButton.innerHTML = '<i class="fas fa-check"></i>';
     completedButton.classList.add('complete-btn');
     workoutDiv.appendChild(completedButton);
@@ -136,7 +144,7 @@ function check(x) {
 
 // save local exercises //
 function saveLocalWorkout(exercise) {
-    // CHECK IF I ALREADY HAVE THINGS IN THERE? //
+    // checks if local storage is already occupied //
     let workout;
     if (localStorage.getItem('workout') === null) {
         workout = [];
@@ -148,7 +156,7 @@ function saveLocalWorkout(exercise) {
 }
 
 function getLocalWorkout() {
-    // CHECK IF I ALREADY HAVE THINGS IN THERE? //
+    // checks if local storage is already ocuppies //
     let workout;
     if (localStorage.getItem('workout') === null) {
         workout = [];
@@ -157,6 +165,7 @@ function getLocalWorkout() {
         formDiv.classList.toggle('hide');
         workoutDiv.classList.toggle('hide');
     }
+
     workout.forEach(function(exercise) {
         // workout div //
         const workoutDiv = document.createElement('div');
@@ -205,4 +214,37 @@ function reset() {
     }
     localStorage.clear();
     location.reload();
+}
+
+function navigateCreateMenu(event) {
+    event.preventDefault();
+
+    formDiv.classList.toggle('hide');
+    createDiv.classList.toggle('hide');
+
+    createButton.addEventListener('submit', exerciseFormData);
+}
+
+function exerciseFormData(event) {
+    event.preventDefault();
+
+    let name = document.querySelector('#exercise-name').value;
+    let split = document.querySelector('#split-id').value;
+    let x = {
+        name: name,
+        split_id: split
+    }
+
+    fetch(`${targetUrl}/exercises`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(x)
+    })
+    .then(resp => resp.json)
+
+    alert('Thank you for adding your exercise to our database!');
+    setTimeout(location.reload(), 0);
 }
