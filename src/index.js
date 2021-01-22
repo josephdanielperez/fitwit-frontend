@@ -18,11 +18,11 @@ const createButton = document.getElementById('create-exercise');
 const backButton = document.getElementById('back');
 
 // buttons event listeners //
-startButton.addEventListener('submit', getFormData);
+startButton.addEventListener('click', getFormData);
 workoutList.addEventListener('click', check);
 finishButton.addEventListener('click', reset);
 navigateButton.addEventListener('click', navigateCreateMenu);
-backButton.addEventListener('click', location.reload);
+backButton.addEventListener('click', back);
 
 // objects & arrays //
 let user;
@@ -161,34 +161,34 @@ function getLocalWorkout() {
     if (localStorage.getItem('workout') === null) {
         workout = [];
     } else {
-        workout = JSON.parse(localStorage.getItem('workout'));
+        let workout = JSON.parse(localStorage.getItem('workout'));
         formDiv.classList.toggle('hide');
         workoutDiv.classList.toggle('hide');
+
+        workout.forEach(function(exercise) {
+            // workout div //
+            const workoutDiv = document.createElement('div');
+            workoutDiv.classList.add('workout');
+    
+            // create list items //
+            const newWorkout = document.createElement('li');
+            newWorkout.innerText = exercise;
+            newWorkout.classList.add('workout-item');
+            workoutDiv.appendChild(newWorkout);
+    
+            // check mark button //
+            const completedButton = document.createElement('button');
+    
+            completedButton.innerHTML = '<i class="fas fa-check"></i>';
+            completedButton.classList.add('complete-btn');
+            workoutDiv.appendChild(completedButton);
+    
+            // append to list //
+            workoutList.appendChild(workoutDiv);
+    
+            completedButton.addEventListener('click', finishBuffer);
+        });
     }
-
-    workout.forEach(function(exercise) {
-        // workout div //
-        const workoutDiv = document.createElement('div');
-        workoutDiv.classList.add('workout');
-
-        // create list items //
-        const newWorkout = document.createElement('li');
-        newWorkout.innerText = exercise;
-        newWorkout.classList.add('workout-item');
-        workoutDiv.appendChild(newWorkout);
-
-        // check mark button //
-        const completedButton = document.createElement('button');
-
-        completedButton.innerHTML = '<i class="fas fa-check"></i>';
-        completedButton.classList.add('complete-btn');
-        workoutDiv.appendChild(completedButton);
-
-        // append to list //
-        workoutList.appendChild(workoutDiv);
-
-        completedButton.addEventListener('click', finishBuffer);
-    });
 }
 
 // allows app to recognize the last clicked element //
@@ -216,13 +216,18 @@ function reset() {
     location.reload();
 }
 
+function back() {
+    formDiv.classList.toggle('hide');
+    createDiv.classList.toggle('hide');
+}
+
 function navigateCreateMenu(event) {
     event.preventDefault();
 
     formDiv.classList.toggle('hide');
     createDiv.classList.toggle('hide');
 
-    createButton.addEventListener('submit', exerciseFormData);
+    createButton.addEventListener('click', exerciseFormData);
 }
 
 function exerciseFormData(event) {

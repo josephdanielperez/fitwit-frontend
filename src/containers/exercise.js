@@ -9,7 +9,4 @@ class Exercise {
         selectedExercises.push(this.name)
     }
 
-    static get name() { return document.getElementsById('exercise-name')[0] };
-    static get split() { return document.getElementsById('split-id')[0] };
-
 }
