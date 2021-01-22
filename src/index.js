@@ -33,7 +33,7 @@ const generatedWorkout = []
 // methods //
 function getFormData(event) {
     event.preventDefault();
-
+    
     let name = User.name.value;
     let split  = User.split.value;
     let length = User.length.value;
@@ -207,7 +207,7 @@ function finishWorkout() {
 
 // resets app //
 function reset() {
-    if (user) {
+    if (user && user.name != '') {
         alert(`Great job today, ${user.name}! See you for another workout soon!`);
     } else {
         alert(`Great job today! See you for another workout soon!`);
